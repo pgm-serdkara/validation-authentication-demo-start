@@ -2,7 +2,7 @@
 import express from "express";
 import bodyParser from "body-parser";
 import expressEjsLayouts from "express-ejs-layouts";
-
+import transporter from "./lib/MailTransporter.js"
 import { VIEWS_PATH, PORT } from "./consts.js";
 
 
@@ -18,6 +18,7 @@ import {
   register,
 } from "./controllers/AuthController.js";
 import ContactValidation from "./middleware/validation/ContactValidation.js";
+
 
 const app = express();
 app.use(express.static("public"));
@@ -51,6 +52,25 @@ app.post("/contact", ContactValidation ,postContact, contact);
  * API Routing
  */
 app.get("/api/user", getUsers);
+	
+	
+app.get("/testmail", async (req, res) => {
+  try {
+    const mailInfo = await transporter.sendMail({
+      from: "noreply@parfumeriegeorgettemadelein.be",
+      to: "foobar@example.com",
+      subject: "Test mail",
+      // text: "This is a test mail",
+      html: `
+      <h1>This is a test mail</h1>
+      <p>With <em>some</em> content</p>
+      `
+    });
+    res.send(mailInfo);
+  } catch (error) {
+    res.send(error);
+  }
+});
 
 // start the server
 app.listen(PORT, () => {
